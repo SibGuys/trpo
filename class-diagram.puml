@@ -1,0 +1,390 @@
+@startuml classDiagram
+allow_mixing
+
+scale max 1920 width
+scale max 1080 height
+
+left to right direction
+top to bottom direction
+
+package Responses {
+    note "Классы ответов пользователю" as N
+
+    class Worker {
+        - UUID id
+        - String firstName
+        - String lastName
+        - String middleName
+    }
+
+    class AccountCard {
+        - UUID id
+        - UUID workerId
+        - String position
+        - String typeOfWorker
+        - int wageAmount
+        - String typeOfCheck
+    }
+
+    class Vacation {
+        - UUID id
+        - LocalDate startDate
+        - LocalDate endDate
+    }
+
+    class WorkTime {
+        - UUID id
+        - LocalDate date
+        - LocalDateTime startTime
+        - LocalDateTime endTime
+        - boolean isPaid
+    }
+
+    class SoldItems {
+        - UUID id
+        - Product product
+        - LocalDate dateOfSale
+        - int countOfSold
+    }
+
+    class Product {
+        - UUID id
+        - String name
+    }
+
+    class Payment {
+        - UUID id
+        - int amount
+        - LocalDate date
+    }
+
+    ' Worker --* Vacation
+    ' AccountCard --* WorkTime
+
+    ' AccountCard --* Payment
+    ' AccountCard --* SoldItems
+    ' SoldItems --o Product
+}
+
+package Requests {
+    note "Классы запросов от пользователя" as N
+
+    class WorkerRequest {
+        - String firstName
+        - String lastName
+        - String middleName
+    }
+
+    class AccountCardRequest {
+        - UUID workerId
+        - String position
+        - String typeOfWorker
+        - int wageAmount
+        - String typeOfCheck
+    }
+
+    class PositionRequest {
+        - UUID id
+        - String position
+    }
+
+    class WorkTimeRequest {
+        - LocalDate date
+        - LocalDateTime startTime
+        - boolean isPaid
+    }
+
+    class UpdateWorkTimeRequest {
+        - UUID workTimeId
+        - LocalDate endTime
+    }
+
+    class VacationRequest {
+        - LocalDate startDate
+        - LocalDate endDate
+        - UUID workerId
+    }
+
+    class TypeOfCheckRequest {
+        - UUID id
+        - String name
+    }
+
+    class SoldItemsRequest {
+        - UUID productId
+        - LocalDate dateOfSale
+        - int countOfSold
+    }
+
+    class PaymentRequest {
+        - int amount
+        - LocalDate date
+    }
+}
+
+
+
+' Worker Flow
+class WorkerController {
+    + List<Worker> getAllWorkers()
+    + UUID addWorker(WorkerRequest addWorker)
+    + boolean updateWorker(Worker worker)
+    + boolean deleteWorker(UUID workerId)
+}
+
+class WorkerService {
+    + List<Worker> getAllWorkers()
+    + UUID addWorker(WorkerRequest addWorker)
+    + boolean updateWorker(Worker worker)
+    + boolean deleteWorker(UUID workerId)
+}
+
+class WorkerRepository {
+    + List<Worker> getAllWorkers()
+    + UUID addWorker(WorkerRequest addWorker)
+    + boolean updateWorker(Worker worker)
+    + boolean deleteWorker(UUID workerId)
+}
+
+WorkerController --> WorkerService: call
+WorkerService --> WorkerRepository: call
+
+' Product Flow
+class ProductController {
+    + List<Product> getAllProducts()
+    + UUID addProduct(String productName)
+    + boolean updateProduct(Product product)
+    + boolean deleteProduct(UUID productId)
+}
+
+class ProductService {
+    + List<Product> getAllProducts()
+    + UUID addProduct(String productName)
+    + boolean updateProduct(Product product)
+    + boolean deleteProduct(UUID productId)
+}
+
+class ProductRepository {
+    + List<Product> getAllProducts()
+    + UUID addProduct(String productName)
+    + boolean updateProduct(Product product)
+    + boolean deleteProduct(UUID productId)
+}
+
+ProductController --> ProductService: call
+ProductService --> ProductRepository: call
+
+' Position Flow
+class PositionController {
+    + List<String> getAllPositionsByWorkerId(UUID workerId)
+    + List<String> getAllPositions()
+    + UUID addPosition(String position)
+    + boolean updatePosition(PositionRequest position)
+    + boolean deletePosition(UUID positionId)
+}
+
+class PositionService {
+    + List<String> getAllPositionsByWorkerId(UUID workerId)
+    + List<String> getAllPositions()
+    + UUID addPosition(String position)
+    + boolean updatePosition(PositionRequest position)
+    + boolean deletePosition(UUID positionId)
+}
+
+class PositionRepository {
+    + List<String> getAllPositionsByWorkerId(UUID workerId)
+    + List<String> getAllPositions()
+    + UUID addPosition(String position)
+    + boolean updatePosition(PositionRequest position)
+    + boolean deletePosition(UUID positionId)
+}
+
+PositionController --> PositionService: call
+PositionService --> PositionRepository: call
+
+' WorkerTime Flow
+class WorkTimeController {
+    + List<WorkTime> getAllWorkTimeByAccountCardId(UUID accountCardId)
+    + List<WorkTime> getAllWorkTimeByWorkerId(UUID workerId)
+    + List<WorkTime> getWorkTimeFromToDateByAccountCardId(LocalDate startDate, LocalDate endDate, UUID accountCardId)
+    + List<WorkTime> getWorkTimeFromToDateByWorkerId(LocalDate startDate, LocalDate endDate, UUID workerId)
+    + UUID addWorkTime(WorkTimeRequest addWorkTimeRequest) // работник пришел и "пикнул" пропуск на входе
+    + boolean updateWorkTime(UpdateWorkTimeRequest) // работник вышел и "пикнул" пропуск на выходе
+}
+
+class WorkTimeService {
+    + List<WorkTime> getAllWorkTimeByAccountCardId(UUID accountCardId)
+    + List<WorkTime> getAllWorkTimeByWorkerId(UUID workerId)
+    + List<WorkTime> getWorkTimeFromToDate(LocalDate startDate, LocalDate endDate, UUID accountCardId)
+    + List<WorkTime> getWorkTimeFromToDateByWorkerId(LocalDate startDate, LocalDate endDate, UUID workerId)
+    + UUID addWorkTime(WorkTimeRequest addWorkTimeRequest)
+    + boolean updateWorkTime(UpdateWorkTimeRequest)
+}
+
+class WorkTimeRepository {
+    + List<WorkTime> getAllWorkTimeByAccountCardId(UUID accountCardId)
+    + List<WorkTime> getAllWorkTimeByWorkerId(UUID workerId)
+    + List<WorkTime> getWorkTimeFromToDate(LocalDate startDate, LocalDate endDate, UUID accountCardId)
+    + List<WorkTime> getWorkTimeFromToDateByWorkerId(LocalDate startDate, LocalDate endDate, UUID workerId)
+    + UUID addWorkTime(WorkTimeRequest addWorkTimeRequest)
+    + boolean updateWorkTime(UpdateWorkTimeRequest)
+}
+
+WorkTimeController --> WorkTimeService: call
+WorkTimeService --> WorkTimeRepository: call
+
+' Vacation Flow
+class VacationController {
+    + List<Vacation> getAllVacationsByWorkerId(UUID workerId)
+    + int getRestVacationDays(UUID workerId)
+    + UUID addVacation(VacationRequest vacation)
+}
+
+class VacationService {
+    + List<Vacation> getAllVacationsByWorkerId(UUID workerId)
+    + int getRestVacationDays(UUID workerId)
+    + UUID addVacation(VacationRequest vacation)
+}
+
+class VacationRepository {
+    + List<Vacation> getAllVacationsByWorkerId(UUID workerId)
+    + int getRestVacationDays(UUID workerId)
+    + UUID addVacation(VacationRequest vacation)
+}
+
+VacationController --> VacationService: call
+VacationService --> VacationRepository: call
+
+' TypeOfCheck Flow
+class TypeOfCheckController {
+    + List<String> getAllTypesOfCheck()
+    + UUID addTypeOfCheck(String typeOfCheck)
+    + boolean updateTypeOfCheck(TypeOfCheckRequest typeOfCheck)
+    + boolean updateTypeOfCheck(UUID id)
+}
+
+class TypeOfCheckService {
+    + List<String> getAllTypesOfCheck()
+    + String getTypeOfCheckByAccountCardId(UUID accountCardId)
+    + UUID addTypeOfCheck(String typeOfCheck)
+    + boolean updateTypeOfCheck(TypeOfCheckRequest typeOfCheck)
+    + boolean updateTypeOfCheck(UUID id)
+}
+
+class TypeOfCheckRepository {
+    + List<String> getAllTypesOfCheck()
+    + UUID addTypeOfCheck(String typeOfCheck)
+    + boolean updateTypeOfCheck(TypeOfCheckRequest typeOfCheck)
+    + boolean updateTypeOfCheck(UUID id)
+}
+
+TypeOfCheckController --> TypeOfCheckService: call
+TypeOfCheckService --> TypeOfCheckRepository: call
+
+' SoldItems Flow
+class SoldItemsController {
+    + List<SoldItems> getAllSoldItemsByWorkerIdFromToDate(UUID workerId, LocalDate startDate, LocalDate endDate)
+    + List<SoldItems> getAllSoldItemsByAccountCardIdFromToDate(UUID accountCardId, LocalDate startDate, LocalDate endDate)
+    + UUID addSoldItems(UUID accountCardId, SoldItemsRequest soldItems)
+}
+
+class SoldItemsService {
+    + List<SoldItems> getAllSoldItemsByWorkerIdFromToDate(UUID workerId, LocalDate startDate, LocalDate endDate)
+    + List<SoldItems> getAllSoldItemsByAccountCardIdFromToDate(UUID accountCardId, LocalDate startDate, LocalDate endDate)
+    + UUID addSoldItems(UUID accountCardId, SoldItemsRequest soldItems)
+}
+
+class SoldItemsRepository {
+    + List<SoldItems> getAllSoldItemsByWorkerIdFromToDate(UUID workerId, LocalDate startDate, LocalDate endDate)
+    + List<SoldItems> getAllSoldItemsByAccountCardIdFromToDate(UUID accountCardId, LocalDate startDate, LocalDate endDate)
+    + UUID addSoldItems(UUID accountCardId, SoldItemsRequest soldItems)
+}
+
+SoldItemsController --> SoldItemsService: call
+SoldItemsService --> SoldItemsRepository: call
+
+' AccountCard Flow
+class AccountCardController {
+    + List<AccountCard> getAllAccountCardsByWorkerId(UUID workerId)
+    + UUID addAccountCard(AccountCardRequest addAccountCard)
+    + boolean updateAccountCard(AccountCard accountCard)
+    + boolean deleteAccountCard(UUID accountCardId)
+}
+
+class AccountCardService {
+    + List<AccountCard> getAllAccountCardsByWorkerId(UUID workerId)
+    + UUID addAccountCard(AccountCardRequest addAccountCard)
+    + boolean updateAccountCard(AccountCard accountCard)
+    + boolean deleteAccountCard(UUID accountCardId)
+}
+
+class AccountCardRepository {
+    + List<AccountCard> getAllAccountCardsByWorkerId(UUID workerId)
+    + UUID addAccountCard(AccountCardRequest addAccountCard)
+    + boolean updateAccountCard(AccountCard accountCard)
+    + boolean deleteAccountCard(UUID accountCardId)
+}
+
+AccountCardController --> AccountCardService: call
+AccountCardService --> AccountCardRepository: call
+
+
+' Payment Flow
+class PaymentController {
+    + List<Payment> getAllPaymentsByAccountCardIdFromToDate(UUID accountCardId, LocalDate startDate, LocalDate endDate)
+    + List<Payment> getAllPaymentsByWorkerIdIdFromToDate(UUID workerId, LocalDate startDate, LocalDate endDate)
+    + UUID addPayment(PaymentRequest payment)
+    + boolean updatePayment(Payment payment)
+    + boolean deletePayment(UUID paymentId)
+}
+
+class PaymentService {
+    - WorkTimeService workTimeService
+    - SoldItemsService soldItemsService
+    + int getCurrentMonthPaymentByAccountCard(UUID accountCardId) // расчитывает зарплату по конкретной должности работника за текущий месяц
+    + int getCurrentMonthPaymentByWorkerId(UUID workerId)
+    + List<Payment> getAllPaymentsByAccountCardIdFromToDate(UUID accountCardId, LocalDate startDate, LocalDate endDate)
+    + List<Payment> getAllPaymentsByWorkerIdIdFromToDate(UUID workerId, LocalDate startDate, LocalDate endDate)
+    + UUID addPayment(PaymentRequest payment)
+    + boolean updatePayment(Payment payment)
+    + boolean deletePayment(UUID paymentId)
+}
+
+class PaymentRepository {
+    + List<Payment> getAllPaymentsByAccountCardIdFromToDate(UUID accountCardId, LocalDate startDate, LocalDate endDate)
+    + List<Payment> getAllPaymentsByWorkerIdIdFromToDate(UUID workerId, LocalDate startDate, LocalDate endDate)
+    + UUID addPayment(PaymentRequest payment)
+    + boolean updatePayment(Payment payment)
+    + boolean deletePayment(UUID paymentId)
+}
+
+PaymentController --> PaymentService: call
+PaymentService --> PaymentRepository: call
+PaymentService --* WorkTimeService
+PaymentService --* SoldItemsService
+
+' Actot User
+actor "UI" as user
+user --> WorkerController
+user --> AccountCardController
+user --> ProductController
+user --> PositionController
+user --> WorkTimeController
+user --> VacationController
+user --> TypeOfCheckController
+user --> SoldItemsController
+user --> PaymentController
+
+' DataBase
+database "DataBase" as db
+WorkerRepository --> db
+AccountCardRepository --> db
+ProductRepository --> db
+PositionRepository --> db
+WorkTimeRepository --> db
+VacationRepository --> db
+TypeOfCheckRepository --> db
+SoldItemsRepository --> db
+PaymentRepository --> db
+
+@enduml
