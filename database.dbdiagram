@@ -1,0 +1,79 @@
+Table account_card {
+  account_card_id UUID [primary key]
+  worker_id UUID [ref: > worker.worker_id]
+  type_of_worker_id UUID [ref: > type_of_worker.type_of_worker_id]
+  type_of_check_id UUID [ref: > type_of_check.type_of_check_id]
+  position_id UUID [ref: > position.position_id]
+    sold_items_id UUID [ref: < sold_items.sold_items_id] 
+  wage_id UUID [ref: > wage.wage_id]
+}
+
+Table worker {
+  worker_id UUID [primary key]
+  worker_name String [not null]
+  worker_surname String [not null]
+  worker_middle_name String [not null]
+  vacation_id UUID [ref: > days_of_vacation.vacation_id]
+}
+
+Table type_of_worker {
+  type_of_worker_id UUID [primary key]
+  type_of_worker_name String [not null]
+}
+
+Table worker_time {
+  worker_id UUID [primary key,ref: > worker.worker_id]
+  worker_start_time timestamp [primary key,not null]
+  worker_end_time timestamp
+  is_paid bool 
+}
+
+Table type_of_check {
+  type_of_check_id UUID [primary key]
+  type_of_check_name String
+}
+
+Table wage {
+  wage_id UUID [primary key]
+  wage_amount int [not null]
+}
+
+Table sold_items {
+  sold_items_id UUID [primary key]
+  product_id UUID [ref : > product.product_id]
+  date_of_sale timestamp
+  numb_of_sold int
+}
+
+Table position {
+  position_id UUID [primary key]
+  position_name String
+}
+
+Table product {
+ product_id UUID [primary key]
+ product_name String
+}
+
+Table sold_items_in_account_card {
+ account_card_id UUID [primary key, ref : > account_card.account_card_id]
+ sold_items_id UUID [primary key, ref : > sold_items.sold_items_id]
+}
+
+Table days_of_vacation {
+  vacation_id UUID [primary key]
+  vacation_days int
+}
+
+Table payment {
+  paymentId UUID
+  account_card_id UUID [primary key, ref : > account_card.account_card_id]
+  amount int
+  payment_date timestamp
+}
+
+Table vacation{
+  worker_id UUID [primary key,ref: > worker.worker_id]
+  start_vacation_date timestamp
+  end_vacation_date timestamp
+}
